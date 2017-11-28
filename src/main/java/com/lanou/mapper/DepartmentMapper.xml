@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.lanou.mapper.DepartmentMapper">
+    <select id="findAll"
+            resultType="com.lanou.domain.Department">
+        SELECT * FROM crm_department
+    </select>
+    <select id="findById"
+            parameterType="java.lang.String"
+            resultType="com.lanou.domain.Department">
+        SELECT * FROM crm_department WHERE depId = #{value}
+    </select>
+
+    <sql id="departSql">
+        crm_department.depId,
+        crm_department.depName
+    </sql>
+    <sql id="postSql">
+        crm_post.postId,
+        crm_post.depId,
+        crm_post.postName
+    </sql>
+    <!-- 根据部门id查找部门下的所有集合 -->
+    <resultMap id="postsByDepIdMap"
+               type="com.lanou.domain.Department">
+        <id column="depId" property="depId"/>
+        <result column="depName" property="depName"/>
+        <!-- 一对多  职务集合 -->
+        <collection property="postList"
+                    ofType="com.lanou.domain.Post">
+            <id column="postId" property="postId"/>
+            <result column="depId" property="depId"/>
+            <result column="postName" property="postName"/>
+        </collection>
+    </resultMap>
+    <!-- 根据部门id查询职务集合,一对多关系-->
+    <select id="findPostByDepId"
+            parameterType="java.lang.String"
+            resultMap="postsByDepIdMap">
+        SELECT
+        <include refid="departSql"/>,
+        <include refid="postSql"/>
+        FROM crm_department,crm_post
+        WHERE crm_department.depId=crm_post.depId
+        AND crm_department.depId=#{value}
+    </select>
+
+</mapper>
